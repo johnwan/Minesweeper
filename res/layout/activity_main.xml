@@ -8,9 +8,19 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.google.games.minesweeper.MainActivity" >
 
-    <TextView
-        android:layout_width="wrap_content"
+    <Button
+        android:id="@+id/reset"
+        android:background="@drawable/i_happy"
         android:layout_height="wrap_content"
-        android:text="@string/hello_world" />
+        android:layout_width="wrap_content"
+        android:layout_marginTop="5dp"
+        android:layout_centerHorizontal="true"/>
+    <Button
+        android:id="@+id/flag"
+        android:background="@drawable/i_flag"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:layout_marginTop="5dp"
+        android:layout_toRightOf="@id/reset"/>
 
 </RelativeLayout>

@@ -17,6 +17,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Toast;
 
 public class GameView extends View {
 	private static final String TAG = "GameView";
@@ -48,10 +49,10 @@ public class GameView extends View {
 	private Paint paint;
 	private String message;
 	//width and height of each tile
-	private static final int tileWidth = 16;
-	private static final int tileHeight = 16;
+	private static final int tileWidth = 50;
+	private static final int tileHeight = 50;
 	private static final int tilesCount = 19;
-	private static final int margin = 16;
+	private static final int margin = 50;
 	private static final int titleHeight = 30;
 
 	private Bitmap[] tiles;
@@ -81,7 +82,7 @@ public class GameView extends View {
 
 		tiles = new Bitmap[tilesCount];//tilesCount = 19;
 		loadTiles();		
-		setFocusable(true);//获得焦点
+		setFocusable(true);//get focus
 	}
 /***
  * 将资源图片的ID放入tiles数组中
@@ -102,7 +103,9 @@ public class GameView extends View {
 		// TODO Auto-generated method stub
 		super.onLayout(changed, left, top, right, bottom);
 		// if(Main.gameState == Main.STATE_START)
-		init(right - left, bottom - top);
+		int width = right - left;
+		int height = bottom - top;
+		init(tileWidth*10,tileHeight*10);
 		startTime = System.currentTimeMillis();
 		updateView();
 
@@ -123,7 +126,7 @@ public class GameView extends View {
 		offsetY = (h - (tileHeight * tileCountY) + titleHeight) / 2;
 
 		mineCount = (int) Math.sqrt(tileCountX * tileCountY) * tileCountX
-				* tileCountY / 100;//雷数?
+				* tileCountY / 100;//number of mines
 		reset();
 	}
 /***
@@ -151,7 +154,7 @@ public class GameView extends View {
 			increase(x + 1, y - 1);
 			increase(x, y - 1);
 		}
-		// set empty tile to image i09 设置空的地域
+		// set empty tile to image i09 
 		for (x = 0; x < tileCountX; x++) {
 			for (y = 0; y < tileCountY; y++) {
 				if (mapGround[x][y] == 0)
@@ -176,21 +179,21 @@ public class GameView extends View {
 	public void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
 		// Log.v(TAG, "onDraw");
-		if (altKeyDown) {//红旗的图标是否未按下样式
-			canvas.drawARGB(255, 255, 0, 0);
-			canvas.drawBitmap(tiles[17], 30, 0, paint);
-		} else {
-			canvas.drawBitmap(tiles[16], 30, 0, paint);
-		}
-
-		if (gameState != STATE_LOST) {//判断笑脸与哭脸
-			canvas.drawBitmap(tiles[18], 0, 0, paint);
-		} else {
-			canvas.drawBitmap(tiles[15], 0, 0, paint);
-		}
-
-		message = "Remain：" + remain + "  Time:" + time + "sec";
-		canvas.drawText(message, 0, message.length(), 80, 15, paint);
+//		if (altKeyDown) {//红旗的图标是否未按下样式
+//			canvas.drawARGB(255, 255, 0, 0);
+//			canvas.drawBitmap(tiles[17], 80, 0, paint);
+//		} else {
+//			canvas.drawBitmap(tiles[16], 80, 0, paint);
+//		}
+//
+//		if (gameState != STATE_LOST) {//判断笑脸与哭脸
+//			canvas.drawBitmap(tiles[18], 0, 0, paint);
+//		} else {
+//			canvas.drawBitmap(tiles[15], 0, 0, paint);
+//		}
+//
+//		message = "Remain：" + remain + "  Time:" + time + "sec";
+//		canvas.drawText(message, 0, message.length(), 150, 15, paint);
 
 		for (int x = 0; x < tileCountX; x += 1) {
 			for (int y = 0; y < tileCountY; y += 1) {
@@ -221,7 +224,7 @@ public class GameView extends View {
 	}
 
 	private void updateView() {
-		Log.v(TAG, "updateView");
+//		Log.v(TAG, "updateView");
 		if (gameState == STATE_PLAYING) {
 			time = (System.currentTimeMillis() - startTime) / 1000;
 			mRedrawHandler.sleep(MILLIS_PER_TICK);
@@ -283,11 +286,13 @@ public class GameView extends View {
 				}
 				invalidate();
 			} else {
+				// restart game
 				if (x < 26 && y < 26) {
 					gameState = STATE_PAUSE;
 					reset();
 					invalidate();
 				}
+				// flag
 				if (x > 30 && x < 56 && y > 0 && y < 26) {
 					altKeyDown = !altKeyDown;
 					invalidate();
@@ -318,6 +323,7 @@ public class GameView extends View {
 					safeCount--;
 					if (safeCount == 0) {
 						gameState = STATE_WIN;
+						Toast.makeText(getContext(), "Win", Toast.LENGTH_SHORT).show();
 					}
 					if (mapGround[x][y] == 9) {
 						open(x - 1, y - 1);

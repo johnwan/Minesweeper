@@ -5,15 +5,19 @@ import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Button;
 
 public class MainActivity extends Activity {
 
-	GameView gameView;
+	private GameView gameView;
+	private Button reset,flag;
 	@Override
-	public void onCreate(Bundle icicle) {
-		super.onCreate(icicle);
+	public void onCreate(Bundle bundle) {
+		super.onCreate(bundle);
 		gameView = new GameView(this);
 		setContentView(gameView);
+		reset = (Button) findViewById(R.id.reset);
+		flag = (Button) findViewById(R.id.flag);
 	}
 
 	@Override
