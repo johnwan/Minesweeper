@@ -47,7 +47,7 @@ public class MainActivity extends Activity {
 	
 	@Override
 	protected void onPause() {
-		gameView.gameState = GameView.STATE_LOST;
+//		gameView.gameState = GameView.STATE_LOST;
 		super.onPause();
 	}
 
