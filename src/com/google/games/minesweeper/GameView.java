@@ -13,10 +13,13 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.os.Message;
+import android.util.AttributeSet;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 public class GameView extends View {
@@ -67,14 +70,26 @@ public class GameView extends View {
 	int safeCount;
 
 	private int mapX, mapY;
-	private boolean altKeyDown = false;
+	public boolean altKeyDown = false;
 
 	private static final int MILLIS_PER_TICK = 500;
 	long startTime, lastTime;
 	long time, remain;
+	private Context context;
+	private Button reset,flag;
+	private TextView gameInfo;
+
+	public TextView getGameInfo() {
+		return gameInfo;
+	}
+
+	public void setGameInfo(TextView gameInfo) {
+		this.gameInfo = gameInfo;
+	}
 
 	public GameView(Context context) {
 		super(context);
+		this.context = context;
 		//paint the tile
 		paint = new Paint();
 		paint.setARGB(255, 60, 60, 200);
@@ -84,6 +99,19 @@ public class GameView extends View {
 		loadTiles();		
 		setFocusable(true);//get focus
 	}
+	
+	 public GameView(Context context, AttributeSet attrs) {
+	    super(context, attrs);
+		this.context = context;
+		//paint the tile
+		paint = new Paint();
+		paint.setARGB(255, 60, 60, 200);
+		paint.setTextSize(12);
+
+		tiles = new Bitmap[tilesCount];//tilesCount = 19;
+		loadTiles();		
+		setFocusable(true);//get focus
+	 }
 /***
  * 将资源图片的ID放入tiles数组中
  */
@@ -105,7 +133,8 @@ public class GameView extends View {
 		// if(Main.gameState == Main.STATE_START)
 		int width = right - left;
 		int height = bottom - top;
-		init(tileWidth*10,tileHeight*10);
+//		init(tileWidth*10,tileHeight*10);
+		init(width,height);
 		startTime = System.currentTimeMillis();
 		updateView();
 
@@ -132,7 +161,7 @@ public class GameView extends View {
 /***
  * 初始化两层地图，并放雷
  */
-	private void reset() {
+	public void reset() {
 		int x, y;
 		mapSky = new int[tileCountX][tileCountY];
 		mapGround = new int[tileCountX][tileCountY];
@@ -174,25 +203,29 @@ public class GameView extends View {
 				mapGround[x][y]++;
 		}
 	}
-
+	
 	@Override
 	public void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
 		// Log.v(TAG, "onDraw");
-//		if (altKeyDown) {//红旗的图标是否未按下样式
-//			canvas.drawARGB(255, 255, 0, 0);
+		if (altKeyDown) {//红旗的图标是否未按下样式
+			canvas.drawARGB(255, 255, 0, 0);
+			flag.setBackground(context.getResources().getDrawable(R.drawable.i_flag_down));
 //			canvas.drawBitmap(tiles[17], 80, 0, paint);
-//		} else {
+		} else {
+			flag.setBackground(context.getResources().getDrawable(R.drawable.i_flag));
 //			canvas.drawBitmap(tiles[16], 80, 0, paint);
-//		}
-//
-//		if (gameState != STATE_LOST) {//判断笑脸与哭脸
+		}
+
+		if (gameState != STATE_LOST) {//判断笑脸与哭脸
+			reset.setBackground(context.getResources().getDrawable(R.drawable.i_happy));
 //			canvas.drawBitmap(tiles[18], 0, 0, paint);
-//		} else {
+		} else {
+			reset.setBackground(context.getResources().getDrawable(R.drawable.i_cry));
 //			canvas.drawBitmap(tiles[15], 0, 0, paint);
-//		}
-//
-//		message = "Remain：" + remain + "  Time:" + time + "sec";
+		}
+		message = "Remain：" + remain + "  Time:" + time + "sec";
+//		gameInfo.setText(message);
 //		canvas.drawText(message, 0, message.length(), 150, 15, paint);
 
 		for (int x = 0; x < tileCountX; x += 1) {
@@ -221,6 +254,22 @@ public class GameView extends View {
 			}
 		}
 
+	}
+
+	public Button getReset() {
+		return reset;
+	}
+
+	public void setReset(Button reset) {
+		this.reset = reset;
+	}
+
+	public Button getFlag() {
+		return flag;
+	}
+
+	public void setFlag(Button flag) {
+		this.flag = flag;
 	}
 
 	private void updateView() {
@@ -285,19 +334,20 @@ public class GameView extends View {
 					open(mapX, mapY);
 				}
 				invalidate();
-			} else {
-				// restart game
-				if (x < 26 && y < 26) {
-					gameState = STATE_PAUSE;
-					reset();
-					invalidate();
-				}
-				// flag
-				if (x > 30 && x < 56 && y > 0 && y < 26) {
-					altKeyDown = !altKeyDown;
-					invalidate();
-				}
-			}
+			} 
+//			else {
+//				// restart game
+//				if (x < 26 && y < 26) {
+//					gameState = STATE_PAUSE;
+//					reset();
+//					invalidate();
+//				}
+//				// flag
+//				if (x > 30 && x < 56 && y > 0 && y < 26) {
+//					altKeyDown = !altKeyDown;
+//					invalidate();
+//				}
+//			}
 		}
 		return true;
 	}
@@ -340,26 +390,6 @@ public class GameView extends View {
 		}
 	}
 
-	@Override
-	public boolean onKeyDown(int keyCode, KeyEvent event) {
-		switch (keyCode) {
-		case KeyEvent.KEYCODE_MENU:
-			altKeyDown = true;
-			return true;
-		}
-		return super.onKeyDown(keyCode, event);
-	}
-
-	@Override
-	public boolean onKeyUp(int keyCode, KeyEvent event) {
-		// TODO Auto-generated method stub
-		switch (keyCode) {
-		case KeyEvent.KEYCODE_MENU:
-			altKeyDown = false;
-			return true;
-		}
-		return super.onKeyUp(keyCode, event);
-	}
 
 	private int screenX2mapX(int c) {//得到横轴所在的格子
 		if (c - offsetX < 0)
