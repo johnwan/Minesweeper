@@ -52,8 +52,8 @@ public class GameView extends View {
 	private Paint paint;
 	private String message;
 	//width and height of each tile
-	private static final int tileWidth = 50;
-	private static final int tileHeight = 50;
+	private static final int tileWidth = 80;
+	private static final int tileHeight = 80;
 	private static final int tilesCount = 19;
 	private static final int margin = 50;
 	private static final int titleHeight = 30;
@@ -93,8 +93,7 @@ public class GameView extends View {
 		//paint the tile
 		paint = new Paint();
 		paint.setARGB(255, 60, 60, 200);
-		paint.setTextSize(12);
-
+		paint.setTextSize(45);
 		tiles = new Bitmap[tilesCount];//tilesCount = 19;
 		loadTiles();		
 		setFocusable(true);//get focus
@@ -106,8 +105,7 @@ public class GameView extends View {
 		//paint the tile
 		paint = new Paint();
 		paint.setARGB(255, 60, 60, 200);
-		paint.setTextSize(12);
-
+		paint.setTextSize(45);
 		tiles = new Bitmap[tilesCount];//tilesCount = 19;
 		loadTiles();		
 		setFocusable(true);//get focus
@@ -225,8 +223,8 @@ public class GameView extends View {
 //			canvas.drawBitmap(tiles[15], 0, 0, paint);
 		}
 		message = "Remain£º" + remain + "  Time:" + time + "sec";
-//		gameInfo.setText(message);
-//		canvas.drawText(message, 0, message.length(), 150, 15, paint);
+		
+		canvas.drawText(message, 0, message.length(), 150, 45, paint);
 
 		for (int x = 0; x < tileCountX; x += 1) {
 			for (int y = 0; y < tileCountY; y += 1) {

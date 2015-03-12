@@ -18,7 +18,6 @@ public class MainActivity extends Activity {
 
 	private GameView gameView;
 	private Button reset,flag;
-	private TextView gameInfo;
 	@Override
 	public void onCreate(Bundle bundle) {
 		super.onCreate(bundle);
@@ -26,7 +25,6 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.activity_main);
 		reset = (Button) findViewById(R.id.reset);
 		flag = (Button) findViewById(R.id.flag);
-		gameInfo = (TextView) findViewById(R.id.gameinfo);
 		gameView = (GameView) findViewById(R.id.gameview);
 		reset.setOnClickListener(new OnClickListener(){
 			@Override
@@ -43,15 +41,8 @@ public class MainActivity extends Activity {
 				gameView.invalidate();
 			}
 		});
-		gameView.setGameInfo(gameInfo);
 		gameView.setFlag(flag);
 		gameView.setReset(reset);
-	}
-
-	@Override 
-	protected void onResume(){
-		gameInfo.setText(gameView.remain+" Left");
-		super.onResume();
 	}
 	
 	@Override
