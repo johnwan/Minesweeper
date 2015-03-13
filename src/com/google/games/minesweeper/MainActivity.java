@@ -1,18 +1,17 @@
 package com.google.games.minesweeper;
 
-import java.util.Timer;
-import java.util.TimerTask;
-
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
-import android.view.KeyEvent;
+import android.text.InputType;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
-import android.widget.TextView;
+import android.widget.EditText;
+import android.widget.Toast;
 
 public class MainActivity extends Activity {
 
@@ -64,7 +63,54 @@ public class MainActivity extends Activity {
 		// automatically handle clicks on the Home/Up button, so long
 		// as you specify a parent activity in AndroidManifest.xml.
 		int id = item.getItemId();
-		if (id == R.id.action_settings) {
+		switch(id){
+		case (R.id.save):
+			gameView.save();
+			return true;
+		case (R.id.load):
+			gameView.load();
+			gameView.invalidate();
+			return true;
+		case (R.id.setting):
+			AlertDialog.Builder alert = new AlertDialog.Builder(this);
+
+			alert.setMessage("Enter Size of Board and Mines Number");
+	
+			final EditText width = new EditText(this);
+			width.setInputType(InputType.TYPE_CLASS_NUMBER);
+			width.setHint("Board Width: (8 - 11)");	
+			alert.setView(width);
+			
+			final EditText height = new EditText(this);
+			height.setInputType(InputType.TYPE_CLASS_NUMBER);
+			height.setHint("Board Height: (8 - 14)");	
+			alert.setView(height);
+			
+			final EditText mine = new EditText(this);
+			mine.setInputType(InputType.TYPE_CLASS_NUMBER);
+			mine.setHint("Mines number: (10 - 30)");	
+			alert.setView(mine);
+	
+			alert.setPositiveButton("Ok",new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog,int id) {
+					int widthNo,heightNo,mineNo;
+					widthNo = Integer.parseInt(width.getText().toString());
+					heightNo = Integer.parseInt(height.getText().toString());
+					mineNo = Integer.parseInt(mine.getText().toString());
+					if(widthNo < 8 || widthNo > 11)
+						Toast.makeText(getBaseContext(), "Board Width should be in range 8-11", Toast.LENGTH_SHORT).show();
+					if(heightNo < 8 || heightNo > 11)
+						Toast.makeText(getBaseContext(), "Board Height should be in range 8-11", Toast.LENGTH_SHORT).show();
+					if(mineNo < 8 || mineNo > 11)
+						Toast.makeText(getBaseContext(), "Mines number should be in range 8-11", Toast.LENGTH_SHORT).show();
+				}
+			  });
+	
+			alert.setNegativeButton("Cancel",new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog,int id) {
+				}
+			  });
+			alert.show();
 			return true;
 		}
 		return super.onOptionsItemSelected(item);

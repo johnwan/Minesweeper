@@ -2,9 +2,14 @@ package com.google.games.minesweeper;
 
 import java.util.Random;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+
 import com.google.games.minesweeper.R;
 
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -13,6 +18,7 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.os.Message;
+import android.preference.PreferenceManager;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -57,6 +63,34 @@ public class GameView extends View {
 	private static final int tilesCount = 19;
 	private static final int margin = 50;
 	private static final int titleHeight = 30;
+	//width and height of the board
+	private int boardWidth = 11, boardHeight = 14;
+	//mines number from setting
+	private int minesNum = 18;
+	
+	public int getBoardWidth() {
+		return boardWidth;
+	}
+
+	public void setBoardWidth(int boardWidth) {
+		this.boardWidth = boardWidth;
+	}
+
+	public int getBoardHeight() {
+		return boardHeight;
+	}
+
+	public void setBoardHeight(int boardHeight) {
+		this.boardHeight = boardHeight;
+	}
+
+	public int getMinesNum() {
+		return minesNum;
+	}
+
+	public void setMinesNum(int minesNum) {
+		this.minesNum = minesNum;
+	}
 
 	private Bitmap[] tiles;
 	
@@ -131,8 +165,8 @@ public class GameView extends View {
 		// if(Main.gameState == Main.STATE_START)
 		int width = right - left;
 		int height = bottom - top;
-//		init(tileWidth*10,tileHeight*10);
-		init(width,height);
+		init(tileWidth*boardWidth+margin*2,tileHeight*boardHeight+titleHeight+margin*2);
+//		init(width,height); // used for largest board
 		startTime = System.currentTimeMillis();
 		updateView();
 
@@ -152,8 +186,9 @@ public class GameView extends View {
 		offsetX = (w - (tileWidth * tileCountX)) / 2;
 		offsetY = (h - (tileHeight * tileCountY) + titleHeight) / 2;
 
-		mineCount = (int) Math.sqrt(tileCountX * tileCountY) * tileCountX
-				* tileCountY / 100;//number of mines
+//		mineCount = (int) Math.sqrt(tileCountX * tileCountY) * tileCountX
+//				* tileCountY / 100;//number of mines
+		mineCount = minesNum;
 		reset();
 	}
 /***
@@ -195,6 +230,55 @@ public class GameView extends View {
 		// shuffle();
 	}
 
+	public void save(){
+		int x, y;
+		SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
+		Editor editor = pref.edit();
+		JSONArray groundArray = new JSONArray();
+		JSONArray skyArray = new JSONArray();
+		for (x = 0; x < tileCountX; x++){
+			for (y = 0; y < tileCountY; y++){
+				groundArray.put(mapGround[x][y]);
+				skyArray.put(mapSky[x][y]);
+			}
+		}
+		editor.putString("ground", groundArray.toString());
+		editor.putString("sky", skyArray.toString());
+		editor.putLong("remain", remain);
+		editor.putInt("state", gameState);
+		editor.putInt("safecount", safeCount);
+		editor.putBoolean("altkey", altKeyDown);
+		editor.putLong("time", time);
+		editor.commit();
+		Toast.makeText(context, "Saved!", Toast.LENGTH_SHORT).show();
+	}
+	
+	public void load(){
+		int x, y;
+		SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
+		try {
+			JSONArray groundArray = new JSONArray(pref.getString("ground", ""));
+			JSONArray skyArray = new JSONArray(pref.getString("sky", ""));
+			int index = 0;
+			for (x = 0; x < tileCountX; x++){
+				for (y = 0; y < tileCountY; y++){
+					mapGround[x][y] = (Integer) groundArray.get(index);
+					mapSky[x][y] = (Integer) skyArray.get(index);
+					index++;
+				}
+			}
+			remain = pref.getLong("remain", 0);
+			gameState = pref.getInt("state", 0);
+			safeCount = pref.getInt("safecount", -1);
+			altKeyDown = pref.getBoolean("altkey", false);
+			time = pref.getLong("time", 0);
+			startTime = System.currentTimeMillis() - time * 1000;
+		} catch (JSONException e) {
+			Toast.makeText(context, "Loading Failed!", Toast.LENGTH_SHORT).show();
+			e.printStackTrace();
+		}
+		Toast.makeText(context, "Loaded!", Toast.LENGTH_SHORT).show();
+	}
 	private void increase(int x, int y) {
 		if (x > -1 && x < tileCountX && y > -1 && y < tileCountY) {
 			if (mapGround[x][y] != 12)
@@ -333,19 +417,6 @@ public class GameView extends View {
 				}
 				invalidate();
 			} 
-//			else {
-//				// restart game
-//				if (x < 26 && y < 26) {
-//					gameState = STATE_PAUSE;
-//					reset();
-//					invalidate();
-//				}
-//				// flag
-//				if (x > 30 && x < 56 && y > 0 && y < 26) {
-//					altKeyDown = !altKeyDown;
-//					invalidate();
-//				}
-//			}
 		}
 		return true;
 	}
