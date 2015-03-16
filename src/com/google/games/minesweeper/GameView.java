@@ -30,10 +30,13 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
-
+/**
+ * The Main functions of the Minesweeper Game
+ * @author Long
+ */
 public class GameView extends View {
 	private static final String TAG = "GameView";
-
+	// handler for refresh the UI
 	private RefreshHandler mRedrawHandler = new RefreshHandler();
 
 	class RefreshHandler extends Handler {
@@ -50,7 +53,7 @@ public class GameView extends View {
 		}
 	};
 
-	// states: start win lost pause.
+	// states: start,win,lose,pause.
 	public static final int STATE_PLAYING = 0;
 	public static final int STATE_WIN = 1;
 	public static final int STATE_LOSE = 2;
@@ -61,9 +64,9 @@ public class GameView extends View {
 	private Paint paint;
 	private String message;
 	//width and height of each tile
-	private static final int tileWidth = 80;
-	private static final int tileHeight = 80;
-	private static final int tilesCount = 19;
+	private static final int tileWidth = 80; // width of each tile
+	private static final int tileHeight = 80; // height of each tile
+	private static final int tilesCount = 19; // 19 images
 	private static final int margin = 50;
 	private static final int titleHeight = 30;
 	//width and height of the board
@@ -114,15 +117,6 @@ public class GameView extends View {
 	long time, remain;
 	private Context context;
 	private Button reset,flag;
-	private TextView gameInfo;
-
-	public TextView getGameInfo() {
-		return gameInfo;
-	}
-
-	public void setGameInfo(TextView gameInfo) {
-		this.gameInfo = gameInfo;
-	}
 
 	public GameView(Context context) {
 		super(context);
@@ -313,10 +307,12 @@ public class GameView extends View {
 			reset.setBackground(context.getResources().getDrawable(R.drawable.i_cry));
 //			canvas.drawBitmap(tiles[15], 0, 0, paint);
 		}
+		
+		// updating remaining mines number and time
 		message = "Remain£º" + remain + "  Time:" + time + "sec";
 		
 		canvas.drawText(message, 0, message.length(), 150, 45, paint);
-
+		// draw the tiles
 		for (int x = 0; x < tileCountX; x += 1) {
 			for (int y = 0; y < tileCountY; y += 1) {
 				Rect rDst = new Rect(offsetX + x * tileWidth, offsetY + y
@@ -368,7 +364,6 @@ public class GameView extends View {
 			mRedrawHandler.sleep(MILLIS_PER_TICK);
 		}
 	}
-
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
 
@@ -379,6 +374,7 @@ public class GameView extends View {
 
 		if (action == MotionEvent.ACTION_DOWN) {
 			// Log.v(TAG, "Checking start ********");
+			// get which tile has been touched
 			mapX = screenX2mapX(x);
 			mapY = screenY2mapY(y);
 
@@ -436,7 +432,7 @@ public class GameView extends View {
 		return 0;
 	}
 
-	public void open(int x, int y) {
+	public void open(int x, int y) {// open the tile
 		if (x > -1 && x < tileCountX && y > -1 && y < tileCountY) {
 			if (mapSky[x][y] == -1)
 				return;
@@ -469,7 +465,7 @@ public class GameView extends View {
 						alert.show();
 					
 					}
-					if (mapGround[x][y] == 9) {
+					if (mapGround[x][y] == 9) { // if it is empty, open its neighbor
 						open(x - 1, y - 1);
 						open(x - 1, y);
 						open(x - 1, y + 1);

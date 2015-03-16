@@ -15,7 +15,10 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Toast;
-
+/**
+ * The UI of the Minesweeper Game
+ * @author Long
+ */
 public class MainActivity extends Activity {
 
 	private GameView gameView;
@@ -28,6 +31,7 @@ public class MainActivity extends Activity {
 		reset = (Button) findViewById(R.id.reset);
 		flag = (Button) findViewById(R.id.flag);
 		gameView = (GameView) findViewById(R.id.gameview);
+		// button for reset the game.
 		reset.setOnClickListener(new OnClickListener(){
 			@Override
 			public void onClick(View v) {
@@ -36,6 +40,7 @@ public class MainActivity extends Activity {
 				gameView.invalidate();
 			}
 		});
+		// button for switch normal/flag mode
 		flag.setOnClickListener(new OnClickListener(){
 			@Override
 			public void onClick(View v) {
@@ -46,25 +51,14 @@ public class MainActivity extends Activity {
 		gameView.setFlag(flag);
 		gameView.setReset(reset);
 	}
-	
-	@Override
-	protected void onPause() {
-//		gameView.gameState = GameView.STATE_LOST;
-		super.onPause();
-	}
-
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.main, menu);
 		return true;
 	}
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		// Handle action bar item clicks here. The action bar will
-		// automatically handle clicks on the Home/Up button, so long
-		// as you specify a parent activity in AndroidManifest.xml.
 		int id = item.getItemId();
 		switch(id){
 		case (R.id.save):
@@ -75,6 +69,7 @@ public class MainActivity extends Activity {
 			gameView.invalidate();
 			return true;
 		case (R.id.setting):
+			// setting dialog
 			AlertDialog.Builder alert = new AlertDialog.Builder(this);
 			alert.setTitle("Settings");
 			alert.setMessage("Enter Size of Board and Mines Number");
@@ -120,7 +115,7 @@ public class MainActivity extends Activity {
 	
 			alert.setNegativeButton("Cancel",new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog,int id) {
-					gameView.gameState = GameView.STATE_LOSE;
+					gameView.gameState = GameView.STATE_LOSE;// cheating here !!!
 				}
 			  });
 			alert.show();
