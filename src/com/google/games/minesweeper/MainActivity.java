@@ -76,7 +76,7 @@ public class MainActivity extends Activity {
 			return true;
 		case (R.id.setting):
 			AlertDialog.Builder alert = new AlertDialog.Builder(this);
-
+			alert.setTitle("Settings");
 			alert.setMessage("Enter Size of Board and Mines Number");
 			View dialoglayout = getLayoutInflater().inflate(R.layout.alert_dialog, null);
 			final EditText width = (EditText) dialoglayout.findViewById(R.id.width);

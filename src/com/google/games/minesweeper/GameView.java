@@ -7,7 +7,9 @@ import org.json.JSONException;
 
 import com.google.games.minesweeper.R;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.res.Resources;
@@ -25,6 +27,7 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -50,7 +53,7 @@ public class GameView extends View {
 	// states: start win lost pause.
 	public static final int STATE_PLAYING = 0;
 	public static final int STATE_WIN = 1;
-	public static final int STATE_LOST = 2;
+	public static final int STATE_LOSE = 2;
 	public static final int STATE_PAUSE = 3;
 	public int gameState;
 
@@ -145,17 +148,17 @@ public class GameView extends View {
 		setFocusable(true);//get focus
 	 }
 /***
- * 将资源图片的ID放入tiles数组中
+ *  put resources into tiles array
  */
 	private void loadTiles() {
 		Resources r = this.getContext().getResources();
-		for (int i = 0; i < tilesCount; i++) {//初始存下19个不同的图片
+		for (int i = 0; i < tilesCount; i++) {//store all the 19 images.
 			tiles[i] = BitmapFactory.decodeResource(r, R.drawable.i00 + i);
 		}
 	}
 	
 /***
- * 初始化第一层
+ * initial game layout based on setting/screen size
  */
 	@Override
 	protected void onLayout(boolean changed, int left, int top, int right,
@@ -176,9 +179,9 @@ public class GameView extends View {
 	}
 	
    /***
-    * 初始化地图，根据屏幕的长宽计算地图中格子的数量，和边缘的宽度
-    * @param 宽
-    * @param 高
+    * initial the map, calculate the number of tiles.
+    * @param width
+    * @param height
     */
 	private void init(int w, int h) {
 		mapX = -1;
@@ -195,7 +198,7 @@ public class GameView extends View {
 		reset();
 	}
 /***
- * 初始化两层地图，并放雷
+ * initial the two layer of map
  */
 	public void reset() {
 		int x, y;
@@ -207,9 +210,9 @@ public class GameView extends View {
 			do {
 				x = random.nextInt(tileCountX);
 				y = random.nextInt(tileCountY);
-			} while (mapGround[x][y] == 12);//避免在重复的位置布雷，设置循环
-			mapGround[x][y] = 12;//12指的是有雷的那幅图片
-           //周围8个相邻地方格子
+			} while (mapGround[x][y] == 12);//avoid set mine in same position
+			mapGround[x][y] = 12;//12 is the image of mine
+           
 			increase(x - 1, y - 1);
 			increase(x - 1, y);
 			increase(x - 1, y + 1);
@@ -226,13 +229,14 @@ public class GameView extends View {
 					mapGround[x][y] = 9;
 			}
 		}
-		safeCount = tileCountX * tileCountY - mineCount;//安全的方格数
+		safeCount = tileCountX * tileCountY - mineCount;//safe tiles
 		time = 0;
-		remain = mineCount;//剩余雷数
+		remain = mineCount;//remains mines
 		altKeyDown = false;
 		// shuffle();
 	}
-
+	// save all data into shared preference.
+	// Cause SharedPreferences can't handle arrays I implement json object to convert array into a string.
 	public void save(){
 		int x, y;
 		SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
@@ -255,7 +259,7 @@ public class GameView extends View {
 		editor.commit();
 		Toast.makeText(context, "Saved!", Toast.LENGTH_SHORT).show();
 	}
-	
+	// load data from SharedPreferences
 	public void load(){
 		int x, y;
 		SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
@@ -293,7 +297,7 @@ public class GameView extends View {
 	public void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
 		// Log.v(TAG, "onDraw");
-		if (altKeyDown) {//红旗的图标是否未按下样式
+		if (altKeyDown) {//if flag button is pressed
 			canvas.drawARGB(255, 255, 0, 0);
 			flag.setBackground(context.getResources().getDrawable(R.drawable.i_flag_down));
 //			canvas.drawBitmap(tiles[17], 80, 0, paint);
@@ -302,7 +306,7 @@ public class GameView extends View {
 //			canvas.drawBitmap(tiles[16], 80, 0, paint);
 		}
 
-		if (gameState != STATE_LOST) {//判断笑脸与哭脸
+		if (gameState != STATE_LOSE) {//if it is lost
 			reset.setBackground(context.getResources().getDrawable(R.drawable.i_happy));
 //			canvas.drawBitmap(tiles[18], 0, 0, paint);
 		} else {
@@ -318,8 +322,8 @@ public class GameView extends View {
 				Rect rDst = new Rect(offsetX + x * tileWidth, offsetY + y
 						* tileHeight, offsetX + (x + 1) * tileWidth, offsetY
 						+ (y + 1) * tileHeight);
-				canvas.drawBitmap(tiles[mapGround[x][y]], null, rDst, paint);//根据数组中的数字对应画出相应的图片
-				if (gameState != STATE_LOST) {
+				canvas.drawBitmap(tiles[mapGround[x][y]], null, rDst, paint);
+				if (gameState != STATE_LOSE) {
 					if (mapSky[x][y] > -1) {
 						canvas.drawBitmap(tiles[mapSky[x][y]], null, rDst,
 								paint);
@@ -327,12 +331,12 @@ public class GameView extends View {
 					}
 				} else {
 					if (mapGround[x][y] != 12 && mapSky[x][y] == 10) {
-						mapSky[x][y] = 14;//游戏失败后，指明插红旗的雷
+						mapSky[x][y] = 14;//if lose, mark all the mines
 					}
 					if (mapSky[x][y] > -1 && mapGround[x][y] != 12
 							|| mapSky[x][y] == 13 || mapSky[x][y] == 10) {
 						canvas.drawBitmap(tiles[mapSky[x][y]], null, rDst,
-								paint);//失败后保持状态的格子
+								paint);//keep all the others tiles
 						// canvas.drawPoint(rDst.left, rDst.top, p);
 					}
 				}
@@ -378,14 +382,14 @@ public class GameView extends View {
 			mapX = screenX2mapX(x);
 			mapY = screenY2mapY(y);
 
-			if (gameState != STATE_LOST && mapX > -1 && mapY > -1) {
+			if (gameState != STATE_LOSE && mapX > -1 && mapY > -1) {
 				if (gameState == STATE_PAUSE) {
 					gameState = STATE_PLAYING;
 					startTime = System.currentTimeMillis();
 					updateView();
 				}
 
-				if (altKeyDown) {//当ALt按下时 插旗
+				if (altKeyDown) {// mark flags state
 					if (mapSky[mapX][mapY] == 0) {
 						mapSky[mapX][mapY] = 10;
 						remain--;
@@ -394,7 +398,7 @@ public class GameView extends View {
 						mapSky[mapX][mapY] = 11;
 					} else if (mapSky[mapX][mapY] == 11) {
 						mapSky[mapX][mapY] = 0;
-					} else if (mapSky[mapX][mapY] == -1) {//模拟扫雷左右键同时按下，sky层没有被初始化的时候为-1
+					} else if (mapSky[mapX][mapY] == -1) {
 						int flags = flag(mapX - 1, mapY - 1)
 								+ flag(mapX - 1, mapY)
 								+ flag(mapX - 1, mapY + 1)
@@ -439,13 +443,31 @@ public class GameView extends View {
 			if (mapSky[x][y] == 0 || mapSky[x][y] == 11) {
 				if (mapGround[x][y] == 12) {
 					mapSky[x][y] = 13;
-					gameState = STATE_LOST;
+					gameState = STATE_LOSE;
 				} else {
 					mapSky[x][y] = -1;
 					safeCount--;
 					if (safeCount == 0) {
 						gameState = STATE_WIN;
-						Toast.makeText(getContext(), "Win", Toast.LENGTH_SHORT).show();
+						
+//						Toast.makeText(getContext(), "Win", Toast.LENGTH_SHORT).show();
+						AlertDialog.Builder alert = new AlertDialog.Builder(context);
+						alert.setTitle("You win!");
+						alert.setMessage("Do you want start a new game?");
+						alert.setPositiveButton("New Game",new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog,int id) {
+								gameState = GameView.STATE_PAUSE;
+								reset();
+								invalidate();
+							}
+						  });
+				
+						alert.setNegativeButton("Cancel",new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog,int id) {
+							}
+						  });
+						alert.show();
+					
 					}
 					if (mapGround[x][y] == 9) {
 						open(x - 1, y - 1);
@@ -463,7 +485,7 @@ public class GameView extends View {
 	}
 
 
-	private int screenX2mapX(int c) {//得到横轴所在的格子
+	private int screenX2mapX(int c) {//get position of column
 		if (c - offsetX < 0)
 			return -1;
 		int rtn = (c - offsetX) / tileWidth;
@@ -472,7 +494,7 @@ public class GameView extends View {
 		return rtn;
 	}
 
-	private int screenY2mapY(int c) {//得到纵轴所在的格子
+	private int screenY2mapY(int c) {//get position of row
 		if (c - offsetY < 0)
 			return -1;
 		int rtn = (c - offsetY) / tileHeight;
