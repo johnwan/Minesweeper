@@ -120,6 +120,7 @@ public class MainActivity extends Activity {
 	
 			alert.setNegativeButton("Cancel",new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog,int id) {
+					gameView.gameState = GameView.STATE_LOSE;
 				}
 			  });
 			alert.show();
