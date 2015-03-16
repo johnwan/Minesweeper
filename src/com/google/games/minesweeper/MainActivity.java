@@ -2,15 +2,18 @@ package com.google.games.minesweeper;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.text.InputType;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 public class MainActivity extends Activity {
@@ -75,34 +78,43 @@ public class MainActivity extends Activity {
 			AlertDialog.Builder alert = new AlertDialog.Builder(this);
 
 			alert.setMessage("Enter Size of Board and Mines Number");
-	
-			final EditText width = new EditText(this);
-			width.setInputType(InputType.TYPE_CLASS_NUMBER);
-			width.setHint("Board Width: (8 - 11)");	
-			alert.setView(width);
+			View dialoglayout = getLayoutInflater().inflate(R.layout.alert_dialog, null);
+			final EditText width = (EditText) dialoglayout.findViewById(R.id.width);
 			
-			final EditText height = new EditText(this);
-			height.setInputType(InputType.TYPE_CLASS_NUMBER);
-			height.setHint("Board Height: (8 - 14)");	
-			alert.setView(height);
+			final EditText height = (EditText) dialoglayout.findViewById(R.id.height);
 			
-			final EditText mine = new EditText(this);
-			mine.setInputType(InputType.TYPE_CLASS_NUMBER);
-			mine.setHint("Mines number: (10 - 30)");	
-			alert.setView(mine);
-	
+			final EditText mine = (EditText) dialoglayout.findViewById(R.id.mine);
+
+			alert.setView(dialoglayout);
 			alert.setPositiveButton("Ok",new DialogInterface.OnClickListener() {
 				public void onClick(DialogInterface dialog,int id) {
 					int widthNo,heightNo,mineNo;
+					try{
 					widthNo = Integer.parseInt(width.getText().toString());
 					heightNo = Integer.parseInt(height.getText().toString());
 					mineNo = Integer.parseInt(mine.getText().toString());
-					if(widthNo < 8 || widthNo > 11)
+
+					if(widthNo < 8 || widthNo > 11){
 						Toast.makeText(getBaseContext(), "Board Width should be in range 8-11", Toast.LENGTH_SHORT).show();
-					if(heightNo < 8 || heightNo > 11)
-						Toast.makeText(getBaseContext(), "Board Height should be in range 8-11", Toast.LENGTH_SHORT).show();
-					if(mineNo < 8 || mineNo > 11)
-						Toast.makeText(getBaseContext(), "Mines number should be in range 8-11", Toast.LENGTH_SHORT).show();
+						return;
+					}
+					if(heightNo < 8 || heightNo > 14){
+						Toast.makeText(getBaseContext(), "Board Height should be in range 8-14", Toast.LENGTH_SHORT).show();
+						return;
+					}
+					if(mineNo < 10 || mineNo > 30){
+						Toast.makeText(getBaseContext(), "Mines number should be in range 10-30", Toast.LENGTH_SHORT).show();
+						return;
+					}
+					//reset a new game with new param
+					gameView.setBoardWidth(widthNo);
+					gameView.setBoardHeight(heightNo);
+					gameView.setMinesNum(mineNo);
+					gameView.initGame();
+					gameView.invalidate();
+					}catch(Exception e){
+						Toast.makeText(getBaseContext(), "Field cannot be blank!", Toast.LENGTH_SHORT).show();
+					}
 				}
 			  });
 	

@@ -162,14 +162,17 @@ public class GameView extends View {
 			int bottom) {
 		// TODO Auto-generated method stub
 		super.onLayout(changed, left, top, right, bottom);
-		// if(Main.gameState == Main.STATE_START)
 		int width = right - left;
 		int height = bottom - top;
+		initGame();
+
+	}
+	
+	public void initGame(){
 		init(tileWidth*boardWidth+margin*2,tileHeight*boardHeight+titleHeight+margin*2);
 //		init(width,height); // used for largest board
 		startTime = System.currentTimeMillis();
 		updateView();
-
 	}
 	
    /***
